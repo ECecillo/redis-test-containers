@@ -1,0 +1,6 @@
+# Environemental files
+.env
+
+# Database files
+
+./data
