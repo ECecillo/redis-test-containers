@@ -8,55 +8,52 @@ import (
 )
 
 type RedisClient struct {
-	rdb *redis.Client
+	conn *redis.Client
 }
 
-func NewRedisClient(redisServerAddress string) *RedisClient {
+func NewRedisClient(redisServerAddress string, password string) (*RedisClient, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     redisServerAddress,
-		Password: "eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81", // no password set
-		DB:       0,                                  // use default DB
+		Password: password,
+		DB:       0,
 	})
-	return &RedisClient{
-		rdb: rdb,
+
+	client := &RedisClient{
+		conn: rdb,
 	}
+
+	return client, nil
 }
 
-func (redisClient *RedisClient) GetCounterValue(ctx context.Context, counterKey string) (int, error) {
-	val, err := redisClient.rdb.Get(ctx, counterKey).Int()
+func (redisClient RedisClient) GetCounterValue(ctx context.Context, counterKey string) (counterValue int, err error) {
+	val, err := redisClient.conn.Get(ctx, counterKey).Int()
 	if err != nil {
 		return 0, err
 	}
 	return val, nil
 }
 
-// For reference.
-func ExampleClient() {
-	var ctx = context.Background()
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81", // no password set
-		DB:       0,                                  // use default DB
-	})
-	err := rdb.Set(ctx, "MyFirstKeyForValue1", "value", 0).Err()
+func (redisClient RedisClient) UpsertCounterValue(ctx context.Context, counterKey string) (newCounterValue int, err error) {
+	cmdResult := redisClient.conn.Incr(ctx, counterKey)
+	err = cmdResult.Err()
 	if err != nil {
-		panic(err)
+		return 0, fmt.Errorf("failed to set the counter key %s with value %d : %w", counterKey, newCounterValue, err)
 	}
 
-	val, err := rdb.Get(ctx, "MyFirstKeyForValue1").Result()
+	value, err := cmdResult.Uint64()
 	if err != nil {
-		panic(err)
+		return 0, fmt.Errorf("failed to transform redis result into uint64 value : %w", err)
 	}
-	fmt.Println("MyFirstKeyForValue1", val)
 
-	val2, err := rdb.Get(ctx, "key2").Result()
-	if err == redis.Nil {
-		fmt.Println("key2 does not exist")
-	} else if err != nil {
-		panic(err)
-	} else {
-		fmt.Println("key2", val2)
+	return int(value), nil
+}
+
+func (redisClient RedisClient) Ping(ctx context.Context) error {
+	fmt.Println("PING")
+	pong, err := redisClient.conn.Ping(context.Background()).Result()
+	if err != nil {
+		return err
 	}
-	// Output: MyFirstKeyForValue1 value
-	// key2 does not exist
+	fmt.Println(pong)
+	return nil
 }
