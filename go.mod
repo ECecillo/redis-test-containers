@@ -3,43 +3,18 @@ module redis-connection/example
 go 1.23.1
 
 require (
-	github.com/coreos/etcd v2.3.8+incompatible
-	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/redis/go-redis v6.15.9+incompatible
 	github.com/redis/go-redis/v9 v9.6.2
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.33.0
-	golang.org/x/telemetry v0.0.0-20241004145657-5eebfecbdf1f
 )
 
 require (
-	github.com/containerd/console v1.0.3 // indirect
-	github.com/containerd/continuity v0.4.2 // indirect
-	github.com/containerd/errdefs v0.1.0 // indirect
-	github.com/containerd/fifo v1.1.0 // indirect
-	github.com/containerd/ttrpc v1.2.4 // indirect
-	github.com/containerd/typeurl/v2 v2.1.1 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
-	github.com/go-redis/redis/v8 v8.11.5 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/moby/locker v1.0.1 // indirect
-	github.com/moby/sys/mountinfo v0.6.2 // indirect
-	github.com/moby/sys/signal v0.7.0 // indirect
-	github.com/opencontainers/runtime-spec v1.1.0 // indirect
-	github.com/opencontainers/selinux v1.11.0 // indirect
-	github.com/pelletier/go-toml v1.9.5 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/urfave/cli v1.22.12 // indirect
 	golang.org/x/net v0.26.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
-	google.golang.org/genproto v0.0.0-20230920204549-e6e6cdab5c13 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240318140521-94a12d6c2237 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
-	google.golang.org/grpc v1.64.1 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -49,7 +24,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/containerd/containerd v1.7.18
+	github.com/containerd/containerd v1.7.18 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/cpuguy83/dockercfg v0.3.1 // indirect
@@ -80,7 +55,6 @@ require (
 	github.com/shirou/gopsutil/v3 v3.23.12 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/testcontainers/testcontainers-go/modules/redis v0.33.0
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect

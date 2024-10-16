@@ -12,7 +12,6 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-// Calling an Increment function will update a counter in our redis database
 func TestIncrementAndRetrieveCounter(t *testing.T) {
 	ctx := context.Background()
 	redisEndpoint := setupRedisTestContainer(t, ctx)
@@ -36,6 +35,32 @@ func TestIncrementAndRetrieveCounter(t *testing.T) {
 
 	if got != expected {
 		t.Errorf("expected value of counter %d is not equal to %d", expected, got)
+	}
+}
+
+func TestDeleteCounterAfterIncrement(t *testing.T) {
+	ctx := context.Background()
+	redisEndpoint := setupRedisTestContainer(t, ctx)
+
+	redisClient, err := repository.NewRedisClient(redisEndpoint, "")
+	assert.NoError(t, err)
+
+	encryptedCounterKey := helper.EncryptKey("myCounter", "secretKey", sha256.New)
+	counter := NewCounter(ctx, encryptedCounterKey, redisClient)
+
+	counter.Increment()
+	counter.Increment()
+	counter.Increment()
+
+	ok, err := counter.Delete()
+	assert.NoError(t, err)
+	if !ok {
+		t.Fatal("delete should have return an ok with value true")
+	}
+
+	_, err = counter.Get()
+	if err == nil {
+		t.Error("expected an error to be thrown")
 	}
 }
 

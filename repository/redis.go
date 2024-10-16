@@ -48,6 +48,16 @@ func (redisClient RedisClient) UpsertCounterValue(ctx context.Context, counterKe
 	return int(value), nil
 }
 
+func (redisClient RedisClient) DeleteCounter(ctx context.Context, counterKey string) (ok bool, err error) {
+	result := redisClient.conn.Del(ctx, counterKey)
+	err = result.Err()
+	if err != nil {
+		return false, fmt.Errorf("tried to delete the following key from redis %s but got err : %w", counterKey, err)
+	}
+	return true, nil
+}
+
+// To test if the connection has been setup correctly
 func (redisClient RedisClient) Ping(ctx context.Context) error {
 	fmt.Println("PING")
 	pong, err := redisClient.conn.Ping(context.Background()).Result()

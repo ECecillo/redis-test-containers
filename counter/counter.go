@@ -38,6 +38,17 @@ func (c *Counter) Get() (int, error) {
 	return value, err
 }
 
+func (c *Counter) Delete() (ok bool, err error) {
+	ok, err = c.repository.DeleteCounter(c.ctx, c.key)
+	if err != nil {
+		return false, fmt.Errorf("failed to delete counter with key %s : %w", c.key, err)
+	}
+	if !ok {
+		return false, fmt.Errorf("query returned no error but got the result is not ok")
+	}
+	return true, nil
+}
+
 func (c *Counter) GetKey() string {
 	return c.key
 }
