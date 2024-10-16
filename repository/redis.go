@@ -1,4 +1,4 @@
-package store
+package repository
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func NewRedisClient(redisServerAddress string) *RedisClient {
 	}
 }
 
-func (redisClient *RedisClient) GetCounterValue(counterKey string) (int, error) {
+func (redisClient *RedisClient) GetCounterValue(ctx context.Context, counterKey string) (int, error) {
 	val, err := redisClient.rdb.Get(ctx, counterKey).Int()
 	if err != nil {
 		return 0, err
@@ -30,9 +30,9 @@ func (redisClient *RedisClient) GetCounterValue(counterKey string) (int, error) 
 	return val, nil
 }
 
-var ctx = context.Background()
-
+// For reference.
 func ExampleClient() {
+	var ctx = context.Background()
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81", // no password set
