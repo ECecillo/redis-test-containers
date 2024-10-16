@@ -15,22 +15,7 @@ import (
 // Calling an Increment function will update a counter in our redis database
 func TestIncrementAndRetrieveCounter(t *testing.T) {
 	ctx := context.Background()
-
-	// Setup Redis tescontainers
-	req := testcontainers.ContainerRequest{
-		Image:        "redis:7.4",
-		ExposedPorts: []string{"6379/tcp"},
-		WaitingFor:   wait.ForLog("Ready to accept connections"),
-	}
-
-	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	assert.NoError(t, err)
-
-	redisEndpoint, err := container.Endpoint(ctx, "")
-	assert.NoError(t, err)
+	redisEndpoint := setupRedisTestContainer(t, ctx)
 
 	redisClient, err := repository.NewRedisClient(redisEndpoint, "")
 	assert.NoError(t, err)
@@ -52,4 +37,24 @@ func TestIncrementAndRetrieveCounter(t *testing.T) {
 	if got != expected {
 		t.Errorf("expected value of counter %d is not equal to %d", expected, got)
 	}
+}
+
+func setupRedisTestContainer(t testing.TB, ctx context.Context) string {
+	t.Helper()
+	req := testcontainers.ContainerRequest{
+		Image:        "redis:7.4",
+		ExposedPorts: []string{"6379/tcp"},
+		WaitingFor:   wait.ForLog("Ready to accept connections"),
+	}
+
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	assert.NoError(t, err)
+
+	redisEndpoint, err := container.Endpoint(ctx, "")
+	assert.NoError(t, err)
+
+	return redisEndpoint
 }
