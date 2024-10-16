@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
@@ -79,6 +80,17 @@ func setupRedisTestContainer(t testing.TB, ctx context.Context) string {
 	assert.NoError(t, err)
 
 	redisEndpoint, err := container.Endpoint(ctx, "")
+	assert.NoError(t, err)
+
+	return redisEndpoint
+}
+
+func setupRedisTestContainerUsingModule(t testing.TB, ctx context.Context) string {
+	t.Helper()
+	redisContainer, err := redis.Run(ctx, "redis:7.4")
+	assert.NoError(t, err)
+
+	redisEndpoint, err := redisContainer.Endpoint(ctx, "")
 	assert.NoError(t, err)
 
 	return redisEndpoint
