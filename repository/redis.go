@@ -67,3 +67,7 @@ func (redisClient RedisClient) Ping(ctx context.Context) error {
 	fmt.Println(pong)
 	return nil
 }
+
+var (
+	_ Repository = &RedisClient{}
+)
