@@ -14,14 +14,7 @@ import (
 )
 
 func TestIncrementAndRetrieveCounter(t *testing.T) {
-	ctx := context.Background()
-	redisEndpoint := setupRedisTestContainer(t, ctx)
-
-	redisClient, err := repository.NewRedisClient(redisEndpoint, "")
-	assert.NoError(t, err)
-
-	encryptedCounterKey := helper.EncryptKey("myCounter", "secretKey", sha256.New)
-	counter := NewCounter(ctx, encryptedCounterKey, redisClient)
+	counter := setupCounter(t)
 
 	counter.Increment()
 	counter.Increment()
@@ -40,14 +33,7 @@ func TestIncrementAndRetrieveCounter(t *testing.T) {
 }
 
 func TestDeleteCounterAfterIncrement(t *testing.T) {
-	ctx := context.Background()
-	redisEndpoint := setupRedisTestContainer(t, ctx)
-
-	redisClient, err := repository.NewRedisClient(redisEndpoint, "")
-	assert.NoError(t, err)
-
-	encryptedCounterKey := helper.EncryptKey("myCounter", "secretKey", sha256.New)
-	counter := NewCounter(ctx, encryptedCounterKey, redisClient)
+	counter := setupCounter(t)
 
 	counter.Increment()
 	counter.Increment()
@@ -63,6 +49,30 @@ func TestDeleteCounterAfterIncrement(t *testing.T) {
 	if err == nil {
 		t.Error("expected an error to be thrown")
 	}
+}
+
+func TestDeleteCounterWhenNotExisting(t *testing.T) {
+	counter := setupCounter(t)
+
+	ok, err := counter.Delete()
+	assert.NoError(t, err)
+	if !ok {
+		t.Fatal("delete should have return an ok with value true")
+	}
+
+}
+
+func setupCounter(t testing.TB) *Counter {
+	ctx := context.Background()
+	redisEndpoint := setupRedisTestContainer(t, ctx)
+
+	redisClient, err := repository.NewRedisClient(redisEndpoint, "")
+	assert.NoError(t, err)
+
+	encryptedCounterKey := helper.EncryptKey("myCounter", "secretKey", sha256.New)
+	counter := NewCounter(ctx, encryptedCounterKey, redisClient)
+
+	return counter
 }
 
 func setupRedisTestContainer(t testing.TB, ctx context.Context) string {
