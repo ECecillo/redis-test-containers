@@ -9,31 +9,26 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 func TestIncrementAndRetrieveCounter(t *testing.T) {
-	counter := setupCounter(t)
+	counter := setupCounterWithRedis(t)
 
 	counter.Increment()
 	counter.Increment()
 	counter.Increment()
 
 	got, err := counter.Get()
-	if err != nil {
-		t.Fatalf("unexpected error while retrieving counter value : %v", err)
-	}
+	assert.NoError(t, err, "unexpected error while retrieving counter value")
 
 	expected := 3
 
-	if got != expected {
-		t.Errorf("expected value of counter %d is not equal to %d", expected, got)
-	}
+	assert.Equal(t, expected, got, "expected same counter value")
 }
 
 func TestDeleteCounterAfterIncrement(t *testing.T) {
-	counter := setupCounter(t)
+	counter := setupCounterWithRedis(t)
 
 	counter.Increment()
 	counter.Increment()
@@ -41,28 +36,23 @@ func TestDeleteCounterAfterIncrement(t *testing.T) {
 
 	ok, err := counter.Delete()
 	assert.NoError(t, err)
-	if !ok {
-		t.Fatal("delete should have return an ok with value true")
-	}
+
+	assert.False(t, ok, "delete should have return an ok with value true")
 
 	_, err = counter.Get()
-	if err == nil {
-		t.Error("expected an error to be thrown")
-	}
+	assert.Error(t, err, "expected an error to be thrown")
 }
 
 func TestDeleteCounterWhenNotExisting(t *testing.T) {
-	counter := setupCounter(t)
+	counter := setupCounterWithRedis(t)
 
 	ok, err := counter.Delete()
 	assert.NoError(t, err)
-	if !ok {
-		t.Fatal("delete should have return an ok with value true")
-	}
-
+	assert.False(t, ok, "delete should have return an ok with value true")
 }
 
-func setupCounter(t testing.TB) *Counter {
+// setupCounterWithRedis create a counter with a static key and using a redis client as repository
+func setupCounterWithRedis(t testing.TB) *Counter {
 	ctx := context.Background()
 	redisEndpoint := setupRedisTestContainer(t, ctx)
 
@@ -75,6 +65,7 @@ func setupCounter(t testing.TB) *Counter {
 	return counter
 }
 
+// setupRedisTestContainer setup a redis database with testcontainers library.
 func setupRedisTestContainer(t testing.TB, ctx context.Context) string {
 	t.Helper()
 	req := testcontainers.ContainerRequest{
@@ -95,13 +86,16 @@ func setupRedisTestContainer(t testing.TB, ctx context.Context) string {
 	return redisEndpoint
 }
 
-func setupRedisTestContainerUsingModule(t testing.TB, ctx context.Context) string {
-	t.Helper()
-	redisContainer, err := redis.Run(ctx, "redis:7.4")
-	assert.NoError(t, err)
+// NOTE: This function is an alternative way of declaring a redis database but if you look
+// closely to the internal of this module you will see that it is nearly the same.
+//
+// func setupRedisTestContainerUsingModule(t testing.TB, ctx context.Context) string {
+// 	t.Helper()
+// 	redisContainer, err := redis.Run(ctx, "redis:7.4")
+// 	assert.NoError(t, err)
 
-	redisEndpoint, err := redisContainer.Endpoint(ctx, "")
-	assert.NoError(t, err)
+// 	redisEndpoint, err := redisContainer.Endpoint(ctx, "")
+// 	assert.NoError(t, err)
 
-	return redisEndpoint
-}
+// 	return redisEndpoint
+//  }
