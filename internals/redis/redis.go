@@ -1,8 +1,9 @@
-package repository
+package redis
 
 import (
 	"context"
 	"fmt"
+	"redis-connection/example/pkg/repository"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -10,6 +11,8 @@ import (
 type RedisClient struct {
 	conn *redis.Client
 }
+
+var _ repository.Repository = &RedisClient{}
 
 func NewRedisClient(redisServerAddress string, password string) (*RedisClient, error) {
 	rdb := redis.NewClient(&redis.Options{

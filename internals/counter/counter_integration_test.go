@@ -3,8 +3,8 @@ package counter
 import (
 	"context"
 	"crypto/sha256"
-	"redis-connection/example/helper"
-	"redis-connection/example/repository"
+	"redis-connection/example/internals/helper"
+	"redis-connection/example/internals/redis"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -56,7 +56,7 @@ func setupCounterWithRedis(t testing.TB) *Counter {
 	ctx := context.Background()
 	redisEndpoint := setupRedisTestContainer(t, ctx)
 
-	redisClient, err := repository.NewRedisClient(redisEndpoint, "")
+	redisClient, err := redis.NewRedisClient(redisEndpoint, "")
 	assert.NoError(t, err)
 
 	encryptedCounterKey := helper.EncryptKey("myCounter", "secretKey", sha256.New)
@@ -69,9 +69,17 @@ func setupCounterWithRedis(t testing.TB) *Counter {
 func setupRedisTestContainer(t testing.TB, ctx context.Context) string {
 	t.Helper()
 	req := testcontainers.ContainerRequest{
-		Image:        "redis:7.4",
+		Image:        "docker.io/bitnami/redis-cluster:7.4",
 		ExposedPorts: []string{"6379/tcp"},
-		WaitingFor:   wait.ForLog("Ready to accept connections"),
+		WaitingFor:   wait.ForLog("Cluster state changed: ok"),
+		Env: map[string]string{
+			"ALLOW_EMPTY_PASSWORD":      "yes",
+			"REDIS_CLUSTER_REPLICAS":    "0",
+			"REDIS_NODES":               "127.0.0.1 127.0.0.1 127.0.0.1",
+			"REDIS_CLUSTER_CREATOR":     "yes",
+			"REDIS_CLUSTER_DYNAMIC_IPS": "no",
+			"REDIS_CLUSTER_ANNOUNCE_IP": "127.0.0.1",
+		},
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{

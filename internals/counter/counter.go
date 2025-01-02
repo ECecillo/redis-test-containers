@@ -3,7 +3,7 @@ package counter
 import (
 	"context"
 	"fmt"
-	"redis-connection/example/repository"
+	"redis-connection/example/pkg/repository"
 )
 
 type Counter struct {
@@ -32,7 +32,7 @@ func (c *Counter) Increment() error {
 func (c *Counter) Get() (int, error) {
 	value, err := c.repository.GetCounterValue(c.ctx, c.key)
 	if err != nil {
-		return 0, fmt.Errorf("failed to retrieve counter value of key %s : %w", c.key, err)
+		return 0, fmt.Errorf("failed to retrieve counter value of key %s, err: %w", c.key, err)
 	}
 
 	return value, err

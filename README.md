@@ -1,10 +1,14 @@
 # Redis Connection POC
 
-This repository is just a quick demo of a counter that use redis as a repository.
+This repository is just a quick demo of a counter that use different database to
 
-We use `testcontainers` to see how we can setup integration test.
+see how we can use `testcontainers` for integration test.
 
-Refer to the Makefile for commands to run.
+## Commands
+
+Use `make` command to run different pipelines.
+
+Refer to the `Makefile` for documentation about each commands.
 
 ## Author
 

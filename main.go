@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"log"
-	"redis-connection/example/repository"
+	"redis-connection/example/redis"
 )
 
 // Just a simple setup to test if we can correctly ping, pong the redis server.
 func main() {
-	redisClient, err := repository.NewRedisClient("localhost:6379", "test")
+	redisClient, err := redis.NewRedisClient("localhost:6379", "test")
 	if err != nil {
 		log.Fatal(err)
 	}
