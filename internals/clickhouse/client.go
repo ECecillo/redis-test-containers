@@ -12,7 +12,7 @@ import (
 
 type ClickHouseClient struct {
 	logger *zap.Logger
-	conn   *driver.Conn
+	conn   driver.Conn
 }
 
 var _ repository.Repository = &ClickHouseClient{}
@@ -21,7 +21,7 @@ func NewClickHouseClient(logger *zap.Logger, conf Config) (*ClickHouseClient, er
 
 	conn, err := connect(conf)
 	if err != nil {
-		return nil, fmt.Errorf("unable to connect to ClickHouse, err: %w", err)
+		return nil, fmt.Errorf("unable to connect to clickhouse, err: %w", err)
 	}
 
 	return &ClickHouseClient{
@@ -45,7 +45,20 @@ func (c *ClickHouseClient) UpsertCounterValue(ctx context.Context, counterKey st
 	panic("unimplemented")
 }
 
-func connect(conf Config) (*driver.Conn, error) {
+func (c ClickHouseClient) Ping(ctx context.Context) error {
+	logger := c.logger.Named("ping")
+
+	logger.Info("PING")
+	if err := c.conn.Ping(ctx); err != nil {
+		logger.Fatal("unable to ping clickhouse server")
+		return fmt.Errorf("unable to ping clickhouse server, err: %w", err)
+	}
+	logger.Info("PONG")
+
+	return nil
+}
+
+func connect(conf Config) (driver.Conn, error) {
 
 	//NOTE: simple setup not a production one.
 	conn, err := clickhouse.Open(&clickhouse.Options{
@@ -57,13 +70,13 @@ func connect(conf Config) (*driver.Conn, error) {
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("unable to establish connection to ClickHouse, err: %w", err)
+		return nil, fmt.Errorf("unable to establish connection to clickhouse, err: %w", err)
 	}
 	v, err := conn.ServerVersion()
 	if err != nil {
-		return nil, fmt.Errorf("unable to get ClickHouse server verison, err: %w", err)
+		return nil, fmt.Errorf("unable to get clickhouse server verison, err: %w", err)
 	}
-	fmt.Println("ClickHouse server version ", v)
+	fmt.Println("clickhouse server version ", v)
 
-	return &conn, nil
+	return conn, nil
 }
