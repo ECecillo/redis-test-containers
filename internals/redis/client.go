@@ -6,15 +6,17 @@ import (
 	"redis-connection/example/pkg/repository"
 
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
 type RedisClient struct {
-	conn *redis.Client
+	logger *zap.Logger
+	conn   *redis.Client
 }
 
 var _ repository.Repository = &RedisClient{}
 
-func NewRedisClient(redisServerAddress string, password string) (*RedisClient, error) {
+func NewRedisClient(logger *zap.Logger, redisServerAddress string, password string) (*RedisClient, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     redisServerAddress,
 		Password: password,
@@ -22,7 +24,8 @@ func NewRedisClient(redisServerAddress string, password string) (*RedisClient, e
 	})
 
 	client := &RedisClient{
-		conn: rdb,
+		logger: logger.Named("redis-client"),
+		conn:   rdb,
 	}
 
 	return client, nil
@@ -62,11 +65,16 @@ func (redisClient RedisClient) DeleteCounter(ctx context.Context, counterKey str
 
 // To test if the connection has been setup correctly
 func (redisClient RedisClient) Ping(ctx context.Context) error {
-	fmt.Println("PING")
+	logger := redisClient.logger.Named("ping")
+
+	logger.Debug("PING")
 	pong, err := redisClient.conn.Ping(context.Background()).Result()
 	if err != nil {
+		// logger.Fatal("could not ping redis server",
+		// 	zap.String("adress", redisClient.conn.Options().Network),
+		// )
 		return err
 	}
-	fmt.Println(pong)
+	logger.Debug(pong)
 	return nil
 }
