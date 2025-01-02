@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"redis-connection/example/redis"
+	"redis-connection/example/internals/redis"
 )
 
 // Just a simple setup to test if we can correctly ping, pong the redis server.

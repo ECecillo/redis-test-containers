@@ -7,7 +7,3 @@ type Repository interface {
 	GetCounterValue(ctx context.Context, counterKey string) (counterValue int, err error)
 	DeleteCounter(ctx context.Context, counterKey string) (ok bool, err error)
 }
-
-var (
-	_ Repository = &RedisClient{}
-)
