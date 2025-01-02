@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"go.uber.org/zap/zaptest"
 )
 
 func TestIncrementAndRetrieveCounter(t *testing.T) {
@@ -53,10 +54,12 @@ func TestDeleteCounterWhenNotExisting(t *testing.T) {
 
 // setupCounterWithRedis create a counter with a static key and using a redis client as repository
 func setupCounterWithRedis(t testing.TB) *Counter {
+	logger := zaptest.NewLogger(t)
+
 	ctx := context.Background()
 	redisEndpoint := setupRedisTestContainer(t, ctx)
 
-	redisClient, err := redis.NewRedisClient(redisEndpoint, "")
+	redisClient, err := redis.NewRedisClient(logger, redisEndpoint, "")
 	assert.NoError(t, err)
 
 	encryptedCounterKey := helper.EncryptKey("myCounter", "secretKey", sha256.New)
