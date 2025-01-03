@@ -68,7 +68,7 @@ func TestDeleteCounterAfterIncrement(t *testing.T) {
 			ok, err := counter.Delete()
 			assert.NoError(t, err)
 
-			assert.False(t, ok, "delete should have return an ok with value true")
+			assert.True(t, ok, "delete should have return an ok with value true")
 
 			_, err = counter.Get()
 			assert.Error(t, err, "expected an error to be thrown")
@@ -99,7 +99,7 @@ func TestDeleteCounterWhenNotExisting(t *testing.T) {
 
 			ok, err := counter.Delete()
 			assert.NoError(t, err)
-			assert.False(t, ok, "delete should have return an ok with value true")
+			assert.True(t, ok, "delete should have return an ok with value true")
 		})
 	}
 
