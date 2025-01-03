@@ -1,9 +1,12 @@
-.PHONY: test-redis-counter
+.PHONY: test-counter test-counter-verbose
 
-COUNTER_RELATIVE_PATH=./internals/counter/.
+COUNTER_RELATIVE_PATH=./internals/counter
 HELPER_RELATIVE_PATH=./internals/helper
 
-test-redis-counter:
+test-counter:
+	@go test ${COUNTER_RELATIVE_PATH}
+
+test-counter-verbose:
 	@go test -v ${COUNTER_RELATIVE_PATH}
 
 benchmark-helper:
