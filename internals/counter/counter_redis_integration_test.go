@@ -50,11 +50,10 @@ func TestDeleteCounterAfterIncrement(t *testing.T) {
 			desc:    "using Redis",
 			counter: setupCounterWithRedisCluster(t),
 		},
-		//TODO:
-		// {
-		// 	desc: "return the correct counter value using ClickHouse",
-		// 	counter: setupCounterWithClickHouse(t),
-		// },
+		{
+			desc:    "return the correct counter value using ClickHouse",
+			counter: setupCounterWithClickHouse(t),
+		},
 	}
 
 	for _, tC := range testCases {
@@ -86,11 +85,10 @@ func TestDeleteCounterWhenNotExisting(t *testing.T) {
 			desc:    "using Redis",
 			counter: setupCounterWithRedisCluster(t),
 		},
-		//TODO:
-		// {
-		// 	desc: "return the correct counter value using ClickHouse",
-		// 	counter: setupCounterWithClickHouse(t),
-		// },
+		{
+			desc:    "return the correct counter value using ClickHouse",
+			counter: setupCounterWithClickHouse(t),
+		},
 	}
 
 	for _, tC := range testCases {

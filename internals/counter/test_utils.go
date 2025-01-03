@@ -65,12 +65,13 @@ func setupRedisClusterTestContainer(t testing.TB, ctx context.Context) string {
 // TODO: setupCounterWithClickHouse setup a counter component and run a ClickHouse
 // server to be used as a repository.
 func setupCounterWithClickHouse(t testing.TB) *Counter {
-
+	panic("todo")
 	return nil
 }
 
 // TODO: setupClickHouseTestContainer setup a ClickHouse databse using testcontainers.
 func setupClickHouseTestContainer(t testing.TB, ctx context.Context) string {
+	panic("todo")
 	return ""
 }
 
