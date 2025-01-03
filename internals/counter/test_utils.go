@@ -3,12 +3,19 @@ package counter
 import (
 	"context"
 	"crypto/sha256"
+	"fmt"
+	"path/filepath"
+	"redis-connection/example/internals/clickhouse"
 	"redis-connection/example/internals/helper"
 	"redis-connection/example/internals/redis"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	tcclickhouse "github.com/testcontainers/testcontainers-go/modules/clickhouse"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"go.uber.org/zap/zaptest"
 )
@@ -19,6 +26,8 @@ import (
 
 // setupCounterWithRedisCluster create a counter with a static key and using a redis client as repository
 func setupCounterWithRedisCluster(t testing.TB) *Counter {
+	t.Helper()
+
 	logger := zaptest.NewLogger(t)
 
 	ctx := context.Background()
@@ -36,6 +45,7 @@ func setupCounterWithRedisCluster(t testing.TB) *Counter {
 // setupRedisClusterTestContainer setup a redis database with testcontainers library.
 func setupRedisClusterTestContainer(t testing.TB, ctx context.Context) string {
 	t.Helper()
+
 	req := testcontainers.ContainerRequest{
 		Image:        "docker.io/bitnami/redis-cluster:7.4",
 		ExposedPorts: []string{"6379/tcp"},
@@ -62,17 +72,65 @@ func setupRedisClusterTestContainer(t testing.TB, ctx context.Context) string {
 	return redisEndpoint
 }
 
-// TODO: setupCounterWithClickHouse setup a counter component and run a ClickHouse
+// setupCounterWithClickHouse setup a counter component and run a ClickHouse
 // server to be used as a repository.
 func setupCounterWithClickHouse(t testing.TB) *Counter {
-	panic("todo")
-	return nil
+	t.Helper()
+
+	logger := zaptest.NewLogger(t)
+
+	ctx := context.Background()
+	conf := clickhouse.Config{
+		Database: "test",
+		Username: "default",
+	}
+
+	clickhouseServerAdress, err := setupClickHouseTestContainer(t, ctx, conf)
+	require.NoError(t, err)
+
+	splittedUrl := strings.Split(clickhouseServerAdress, ":")
+	if len(splittedUrl) < 2 {
+		t.Fatalf("split string has less value than expected, please verify adress : %s", splittedUrl)
+	}
+
+	conf.Host = splittedUrl[0]
+	conf.Port, err = strconv.Atoi(splittedUrl[1])
+	require.NoError(t, err, "unable to convert port string to int")
+
+	clickhouseClient, err := clickhouse.NewClickHouseClient(logger, conf)
+	assert.NoError(t, err)
+
+	encryptedCounterKey := helper.EncryptKey("myCounter", "secretKey", sha256.New)
+	counter := NewCounter(ctx, encryptedCounterKey, clickhouseClient)
+
+	return counter
 }
 
-// TODO: setupClickHouseTestContainer setup a ClickHouse databse using testcontainers.
-func setupClickHouseTestContainer(t testing.TB, ctx context.Context) string {
-	panic("todo")
-	return ""
+// setupClickHouseTestContainer setup a ClickHouse databse using testcontainers.
+func setupClickHouseTestContainer(t testing.TB, ctx context.Context, config clickhouse.Config) (string, error) {
+	t.Helper()
+
+	relativeServerDirPath := "fs/volumes/clickhouse/etc/clickhouse-server/"
+
+	clickHouseContainer, err := tcclickhouse.Run(ctx,
+		"clickhouse/clickhouse-server:latest-alpine",
+		tcclickhouse.WithUsername(config.Username),
+		tcclickhouse.WithPassword(config.Password),
+		tcclickhouse.WithDatabase(config.Database),
+		//FIXME: Use localpath
+		// tcclickhouse.WithInitScripts(filepath.Join("testdata", "init-db.sh")),
+		tcclickhouse.WithConfigFile(filepath.Join(relativeServerDirPath, "config.d/config.xml")),
+	)
+
+	if err != nil {
+		return "", fmt.Errorf("unable to run clickhouse container, err: %w", err)
+	}
+	serverAdress, err := clickHouseContainer.Endpoint(ctx, "")
+	if err != nil {
+		return "", fmt.Errorf("unable to get server endpoint, err: %w", err)
+	}
+
+	return serverAdress, nil
 }
 
 // NOTE: This function is an alternative way of declaring a redis database but if you look

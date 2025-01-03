@@ -15,11 +15,10 @@ func TestIncrementAndRetrieveCounter(t *testing.T) {
 			desc:    "using Redis",
 			counter: setupCounterWithRedisCluster(t),
 		},
-		//TODO:
-		// {
-		// 	desc: "return the correct counter value using ClickHouse",
-		// 	counter: setupCounterWithClickHouse(t),
-		// },
+		{
+			desc:    "return the correct counter value using ClickHouse",
+			counter: setupCounterWithClickHouse(t),
+		},
 	}
 
 	for _, tC := range testCases {
